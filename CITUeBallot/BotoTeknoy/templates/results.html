@@ -1,0 +1,6 @@
+<h2>Election Results</h2>
+<ul>
+{% for candidate in candidates %}
+    <li>{{ candidate.name }} ({{ candidate.party }}) - Votes: {{ candidate.total_votes }}</li>
+{% endfor %}
+</ul>

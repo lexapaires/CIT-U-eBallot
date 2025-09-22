@@ -16,7 +16,43 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('register/', views.register_voter, name='register_voter'),
+    path('success/', views.voter_success, name='voter_success'),
+]
+
+class Candidate(models.Model):
+    name = models.CharField(max_length=100)
+    party = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+
+class Vote(models.Model):
+    voter = models.ForeignKey(Voter, on_delete=models.CASCADE)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
+
+
+def vote(request):
+    candidates = Candidate.objects.all()
+    if request.method == 'POST':
+        voter_id = request.POST['voter_id']
+        candidate_id = request.POST['candidate_id']
+        voter = Voter.objects.get(id=voter_id)
+        candidate = Candidate.objects.get(id=candidate_id)
+        Vote.objects.create(voter=voter, candidate=candidate)
+        return redirect('vote_success')
+    return render(request, 'vote.html', {'candidates': candidates})
+
+def vote_success(request):
+    return render(request, 'vote_success.html')
+
+urlpatterns += [
+    path('vote/', views.vote, name='vote'),
+    path('vote/success/', views.vote_success, name='vote_success'),
+    path('results/', views.results, name='results'),
 ]
